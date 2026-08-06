@@ -69,7 +69,7 @@ const end = new Date(auction.endsAt);
     }
   };
 
-  const handlePlaceBid = async (e) => {
+  const handlePlaceBid = async (e: any) => {
     e.preventDefault();
     setBidError('');
     setBidLoading(true);
