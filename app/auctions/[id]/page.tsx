@@ -30,7 +30,7 @@ export default function AuctionDetail() {
       const now = new Date();
       if (!auction?.endsAt) return;
 const end = new Date(auction.endsAt);
-      const diff = end - now;
+      const diff = end.getTime() - now.getTime();
 
       if (diff < 0) {
         setTimeLeft('Ended');
