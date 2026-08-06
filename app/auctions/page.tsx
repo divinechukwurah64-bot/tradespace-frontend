@@ -30,7 +30,7 @@ export default function Auctions() {
   const timeRemaining = (endsAt) => {
     const now = new Date();
     const end = new Date(endsAt);
-    const diff = end - now;
+    const diff = end.getTime() - now.getTime();
     
     if (diff < 0) return 'Ended';
     
