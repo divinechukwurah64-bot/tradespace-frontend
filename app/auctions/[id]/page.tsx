@@ -28,7 +28,8 @@ export default function AuctionDetail() {
 
     const updateTimer = () => {
       const now = new Date();
-      const end = new Date(auction.endsAt);
+      if (!auction?.endsAt) return;
+const end = new Date(auction.endsAt);
       const diff = end - now;
 
       if (diff < 0) {
