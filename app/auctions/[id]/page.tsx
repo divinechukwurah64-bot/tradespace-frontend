@@ -11,7 +11,7 @@ export default function AuctionDetail() {
   const router = useRouter();
   const auctionId = params.id;
 
-  const [auction, setAuction] = useState(null);
+  const [auction, setAuction] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [bidAmount, setBidAmount] = useState('');
