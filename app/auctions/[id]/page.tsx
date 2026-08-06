@@ -93,7 +93,7 @@ const end = new Date(auction.endsAt);
       
       setBidAmount('');
       fetchAuction();
-    } catch (err) {
+    } catch (err: any) {
       setBidError(err.response?.data?.error || 'Failed to place bid');
     } finally {
       setBidLoading(false);
