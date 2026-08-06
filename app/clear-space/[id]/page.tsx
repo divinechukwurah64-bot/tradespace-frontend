@@ -12,7 +12,7 @@ export default function GigDetail() {
   const router = useRouter();
   const gigId = params.id;
 
-  const [gig, setGig] = useState(null);
+  const [gig, setGig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [ordering, setOrdering] = useState(false);
