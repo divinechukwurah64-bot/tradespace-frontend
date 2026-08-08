@@ -205,26 +205,41 @@ export default function AuctionDetail() {
               </div>
             </div>
 
-            {/* Seller Info */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Seller Information
-              </h3>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {auction.seller?.name?.[0]?.toUpperCase() || 'S'}
-                </div>
-                <div>
-                  <p className="font-semibold text-black">{auction.seller?.name}</p>
-                  <p className="text-sm text-gray-600">{auction.seller?.email}</p>
-                  {auction.seller?.phone && (
-                    <p className="text-sm text-gray-600">{auction.seller.phone}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+           {/* Seller Info */}
+<div className="bg-white rounded-lg shadow p-6">
+  <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
+    <User className="w-5 h-5" />
+    Seller Information
+  </h3>
+  <div className="flex items-center gap-4 mb-4">
+    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+      {auction.sellerId?.name?.[0]?.toUpperCase() || auction.seller?.name?.[0]?.toUpperCase() || 'S'}
+    </div>
+    <div>
+      <p className="font-semibold text-black text-lg">{auction.sellerId?.name || auction.seller?.name || 'Unknown Seller'}</p>
+      <p className="text-sm text-gray-600">{auction.sellerId?.email || auction.seller?.email || 'No email'}</p>
+      <p className="text-sm text-gray-600">{auction.sellerId?.phone || auction.seller?.phone || 'No phone'}</p>
+    </div>
+  </div>
+  
+  <div className="pt-4 border-t border-gray-200">
+    <p className="text-xs text-gray-600 mb-2">Seller Stats</p>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <p className="text-2xl font-bold text-black">⭐ 4.8</p>
+        <p className="text-xs text-gray-600">Rating</p>
+      </div>
+      <div>
+        <p className="text-2xl font-bold text-black">127</p>
+        <p className="text-xs text-gray-600">Items Sold</p>
+      </div>
+    </div>
+  </div>
+
+  <button className="w-full mt-4 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 transition font-semibold">
+    Contact Seller
+  </button>
+</div>
 
           {/* Right - Auction Details & Bidding */}
           <div>
