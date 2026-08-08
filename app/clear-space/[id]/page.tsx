@@ -134,41 +134,21 @@ export default function GigDetail() {
               </div>
             )}
 
-           {/* Seller Info */}
-<div className="bg-white rounded-lg shadow p-6">
-  <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
-    <User className="w-5 h-5" />
-    Seller Information
-  </h3>
-  <div className="flex items-center gap-4 mb-4">
-    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-      {auction.sellerId?.name?.[0]?.toUpperCase() || auction.seller?.name?.[0]?.toUpperCase() || 'S'}
-    </div>
-    <div>
-      <p className="font-semibold text-black text-lg">{auction.sellerId?.name || auction.seller?.name || 'Unknown Seller'}</p>
-      <p className="text-sm text-gray-600">{auction.sellerId?.email || auction.seller?.email || 'No email'}</p>
-      <p className="text-sm text-gray-600">{auction.sellerId?.phone || auction.seller?.phone || 'No phone'}</p>
-    </div>
-  </div>
-  
-  <div className="pt-4 border-t border-gray-200">
-    <p className="text-xs text-gray-600 mb-2">Seller Stats</p>
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <p className="text-2xl font-bold text-black">⭐ 4.8</p>
-        <p className="text-xs text-gray-600">Rating</p>
-      </div>
-      <div>
-        <p className="text-2xl font-bold text-black">127</p>
-        <p className="text-xs text-gray-600">Items Sold</p>
-      </div>
-    </div>
-  </div>
-
-  <button className="w-full mt-4 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 transition font-semibold">
-    Contact Seller
-  </button>
-</div>
+            {/* Seller Info */}
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  {gig.sellerId?.fullName?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="font-bold text-black text-lg">{gig.sellerId?.fullName}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="font-bold text-black">{gig.rating || 5}</span>
+                    <span className="text-gray-600 text-sm">({gig.orders || 0} orders)</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
   {/* Price & Order */}
