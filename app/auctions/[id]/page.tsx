@@ -146,7 +146,6 @@ export default function AuctionDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <Link href="/auctions" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
@@ -157,12 +156,9 @@ export default function AuctionDetail() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left - Images */}
           <div className="lg:col-span-2">
-            {/* Main Image */}
             <div className="bg-white rounded-lg shadow overflow-hidden mb-4">
               <img
                 src={images[imageIndex]}
@@ -170,7 +166,6 @@ export default function AuctionDetail() {
                 className="w-full h-64 md:h-80 object-cover"
               />
               
-              {/* Image Navigation */}
               {images.length > 1 && (
                 <div className="bg-gray-100 p-4 flex gap-2 overflow-x-auto">
                   {images.map((img: string, idx: number) => (
@@ -188,7 +183,6 @@ export default function AuctionDetail() {
               )}
             </div>
 
-            {/* Description */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <h2 className="text-2xl font-bold text-black mb-4">Description</h2>
               <p className="text-gray-700 leading-relaxed mb-4">{auction.description}</p>
@@ -205,45 +199,43 @@ export default function AuctionDetail() {
               </div>
             </div>
 
-           {/* Seller Info */}
-<div className="bg-white rounded-lg shadow p-6">
-  <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
-    <User className="w-5 h-5" />
-    Seller Information
-  </h3>
-  <div className="flex items-center gap-4 mb-4">
-    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-      {auction.sellerId?.name?.[0]?.toUpperCase() || auction.seller?.name?.[0]?.toUpperCase() || 'S'}
-    </div>
-    <div>
-      <p className="font-semibold text-black text-lg">{auction.sellerId?.name || auction.seller?.name || 'Unknown Seller'}</p>
-      <p className="text-sm text-gray-600">{auction.sellerId?.email || auction.seller?.email || 'No email'}</p>
-      <p className="text-sm text-gray-600">{auction.sellerId?.phone || auction.seller?.phone || 'No phone'}</p>
-    </div>
-  </div>
-  
-  <div className="pt-4 border-t border-gray-200">
-    <p className="text-xs text-gray-600 mb-2">Seller Stats</p>
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <p className="text-2xl font-bold text-black">⭐ 4.8</p>
-        <p className="text-xs text-gray-600">Rating</p>
-      </div>
-      <div>
-        <p className="text-2xl font-bold text-black">127</p>
-        <p className="text-xs text-gray-600">Items Sold</p>
-      </div>
-    </div>
-  </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Seller Information
+              </h3>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  {auction.sellerId?.name?.[0]?.toUpperCase() || auction.seller?.name?.[0]?.toUpperCase() || 'S'}
+                </div>
+                <div>
+                  <p className="font-semibold text-black text-lg">{auction.sellerId?.name || auction.seller?.name || 'Unknown Seller'}</p>
+                  <p className="text-sm text-gray-600">{auction.sellerId?.email || auction.seller?.email || 'No email'}</p>
+                  <p className="text-sm text-gray-600">{auction.sellerId?.phone || auction.seller?.phone || 'No phone'}</p>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t border-gray-200">
+                <p className="text-xs text-gray-600 mb-2">Seller Stats</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-2xl font-bold text-black">⭐ 4.8</p>
+                    <p className="text-xs text-gray-600">Rating</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-black">127</p>
+                    <p className="text-xs text-gray-600">Items Sold</p>
+                  </div>
+                </div>
+              </div>
 
-  <button className="w-full mt-4 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 transition font-semibold">
-    Contact Seller
-  </button>
-</div>
+              <button className="w-full mt-4 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 transition font-semibold">
+                Contact Seller
+              </button>
+            </div>
+          </div>
 
-          {/* Right - Auction Details & Bidding */}
           <div>
-            {/* Timer */}
             <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6 mb-6">
               <div className="flex items-center gap-2 mb-2">
                 <Clock className="w-5 h-5 text-red-600" />
@@ -252,7 +244,6 @@ export default function AuctionDetail() {
               <p className="text-3xl font-bold text-red-600">{timeLeft}</p>
             </div>
 
-            {/* Price Section */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <p className="text-sm text-gray-600 mb-2">Starting Bid</p>
               <p className="text-2xl font-bold text-black mb-4">₦{auction.startingBid?.toLocaleString()}</p>
@@ -270,7 +261,6 @@ export default function AuctionDetail() {
               </div>
             </div>
 
-            {/* Bidding Form */}
             {!isSellerLoggedIn && timeLeft !== 'Auction Ended' && (
               <form onSubmit={handlePlaceBid} className="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 className="font-bold text-black mb-4">Place a Bid</h3>
@@ -297,7 +287,6 @@ export default function AuctionDetail() {
               </form>
             )}
 
-            {/* Seller Actions */}
             {isSellerLoggedIn && (
               <button
                 onClick={handleDeleteAuction}
@@ -317,7 +306,6 @@ export default function AuctionDetail() {
               </div>
             )}
 
-            {/* Share */}
             <div className="flex gap-3">
               <button className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition">
                 <Heart className="w-5 h-5" />
@@ -329,7 +317,6 @@ export default function AuctionDetail() {
           </div>
         </div>
 
-        {/* Bids History */}
         {auction.bids && auction.bids.length > 0 && (
           <div className="mt-8 bg-white rounded-lg shadow p-6">
             <h3 className="text-xl font-bold text-black mb-4">Bid History</h3>
