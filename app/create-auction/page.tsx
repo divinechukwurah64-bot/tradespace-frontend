@@ -20,6 +20,7 @@ export default function CreateAuction() {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
+    console.log('Uploading with preset:', process.env.NEXT_PUBLIC_CLOUDINARY_PRESET);
     if (!file) return;
 
     setUploadingImage(true);
