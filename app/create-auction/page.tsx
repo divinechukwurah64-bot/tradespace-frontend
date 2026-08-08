@@ -12,13 +12,14 @@ export default function CreateAuction() {
   const [success, setSuccess] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    startingPrice: '',
-    category: 'Other',
-    condition: 'New',
-  });
+ const [formData, setFormData] = useState({
+  title: '',
+  description: '',
+  startingPrice: '',
+  category: '',
+  condition: '',
+  image: '',  // ADD THIS LINE
+});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
