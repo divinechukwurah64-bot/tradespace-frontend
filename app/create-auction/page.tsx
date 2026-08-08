@@ -53,8 +53,8 @@ export default function CreateAuction() {
       await API.post('/auctions', {
         title: formData.title,
         description: formData.description,
-        startingPrice: parseFloat(formData.startingPrice),
-        image: formData.image || 'https://via.placeholder.com/400x300?text=Product+Image',
+        startingPrice: Number(formData.startingPrice),
+        image: formData.image || 'https://via.placeholder.com/400x300?text=Product+Image',,
       });
       router.push('/auctions');
     } catch (err) {
