@@ -76,6 +76,7 @@ export default function CreateAuction() {
           startingPrice: '',
           category: 'Other',
           condition: 'New',
+          image: '',
         });
         setImageUrl('');
 
