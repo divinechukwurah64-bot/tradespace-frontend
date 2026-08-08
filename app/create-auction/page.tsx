@@ -233,8 +233,8 @@ export default function CreateAuction() {
             <CldUploadWidget
               uploadPreset="tradespace"
               onSuccess={(result: any) => {
-  setFormData({ ...formData, image: result.info.secure_url });
-}}
+                setFormData({ ...formData, image: result.info.secure_url });
+              }}
               onError={(error) => {
                 console.error('Upload error:', error);
                 setError('Image upload failed. Please try again.');
@@ -246,10 +246,10 @@ export default function CreateAuction() {
                   onClick={() => open()}
                   className="w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors"
                 >
-                  {imageUrl ? (
+                  {formData.image ? (
                     <div className="flex flex-col items-center">
                       <img
-                        src={imageUrl}
+                        src={formData.image}
                         alt="Product preview"
                         className="w-32 h-32 object-cover mx-auto rounded mb-2"
                       />
