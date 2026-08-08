@@ -232,9 +232,9 @@ export default function CreateAuction() {
             </label>
             <CldUploadWidget
               uploadPreset="tradespace"
-              onSuccess={(result) => {
-                setImageUrl(result.info.secure_url);
-              }}
+              onSuccess={(result: any) => {
+  setFormData({ ...formData, image: result.info.secure_url });
+}}
               onError={(error) => {
                 console.error('Upload error:', error);
                 setError('Image upload failed. Please try again.');
