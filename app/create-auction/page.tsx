@@ -50,12 +50,14 @@ export default function CreateAuction() {
     setLoading(true);
 
     try {
-      await API.post('/auctions', {
-        title: formData.title,
-        description: formData.description,
-        startingPrice: Number(formData.startingPrice),
-        image: formData.image || 'https://via.placeholder.com/400x300?text=Product+Image',
-      });
+     await API.post('/auctions', {
+     title: formData.title,
+     description: formData.description,
+     category: 'Other',
+     condition: 'New',
+     startingBid: Number(formData.startingPrice),
+     images: formData.image ? [formData.image] : ['https://via.placeholder.com/400x300'],
+    });
       router.push('/auctions');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create auction');
