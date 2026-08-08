@@ -54,7 +54,7 @@ export default function CreateAuction() {
         title: formData.title,
         description: formData.description,
         startingPrice: parseFloat(formData.startingPrice),
-        image: formData.image || 'https://via.placeholder.com/400x300?text=Product+Image',,
+        image: formData.image || 'https://via.placeholder.com/400x300?text=Product+Image',
       });
       router.push('/auctions');
     } catch (err) {
