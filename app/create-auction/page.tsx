@@ -246,10 +246,10 @@ export default function CreateAuction() {
                   onClick={() => open()}
                   className="w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors"
                 >
-                  {formData.image ? (
+                  {imageUrl ? (
                     <div className="flex flex-col items-center">
                       <img
-                        src={formData.image}
+                        src={imageUrl}
                         alt="Product preview"
                         className="w-32 h-32 object-cover mx-auto rounded mb-2"
                       />
