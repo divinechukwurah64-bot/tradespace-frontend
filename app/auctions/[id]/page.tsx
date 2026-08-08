@@ -167,7 +167,7 @@ export default function AuctionDetail() {
               <img
                 src={images[imageIndex]}
                 alt={auction.title}
-                className="w-full h-96 md:h-500 object-cover"
+                className="w-full h-64 md:h-80 object-cover"
               />
               
               {/* Image Navigation */}
