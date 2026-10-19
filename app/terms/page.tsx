@@ -1,4 +1,4 @@
-const SUPPORT_EMAIL = 'your-support-email@example.com';
+const SUPPORT_EMAIL = 'divinechukwurah64@gmail.com';
 const LAST_UPDATED = 'October 18, 2026';
 
 const page: React.CSSProperties = {
