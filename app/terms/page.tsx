@@ -5,7 +5,7 @@ const page: React.CSSProperties = {
   maxWidth: 800,
   margin: '0 auto',
   padding: '40px 16px 64px',
-  color: '#111827',
+  color: '#e9ecf3',
   lineHeight: 1.7,
 };
 
