@@ -82,12 +82,17 @@ export default function Auctions() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-black">Live Auctions</h1>
-              <p className="text-gray-600 mt-2">Browse and bid on thousands of items</p>
+          <div className="flex justify-between items-center gap-3">
+            <div className="min-w-0">
+              <h1 className="text-2xl md:text-3xl font-bold text-black">Live Auctions</h1>
+              <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">
+                Browse and bid on thousands of items
+              </p>
             </div>
-            <Link href="/create-auction" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            <Link
+              href="/create-auction"
+              className="flex-shrink-0 whitespace-nowrap bg-blue-600 text-white text-sm md:text-base font-semibold px-4 py-2 md:px-6 rounded-lg hover:bg-blue-700"
+            >
               Create Auction
             </Link>
           </div>
