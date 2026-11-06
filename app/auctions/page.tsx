@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Clock, Search, X } from 'lucide-react';
+import { Check, ChevronDown, Clock, Search, X } from 'lucide-react';
 import API from '@/lib/api';
 import { AUCTION_CATEGORIES } from '@/lib/categories';
 
 const SORT_OPTIONS = [
   { value: 'ending', label: 'Ending soon' },
   { value: 'newest', label: 'Newest' },
-  { value: 'price-low', label: 'Price: low' },
-  { value: 'price-high', label: 'Price: high' },
+  { value: 'price-low', label: 'Price: low to high' },
+  { value: 'price-high', label: 'Price: high to low' },
   { value: 'bids', label: 'Most bids' },
 ];
 
@@ -93,6 +93,8 @@ export default function Auctions() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('ending');
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchAuctions = async () => {
@@ -108,6 +110,30 @@ export default function Auctions() {
 
     fetchAuctions();
   }, []);
+
+  // Closes the sort menu when you tap outside it or press Escape
+  useEffect(() => {
+    if (!sortOpen) return;
+
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSortOpen(false);
+    };
+
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('touchstart', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('touchstart', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [sortOpen]);
 
   const words = useMemo(
     () => search.toLowerCase().split(/\s+/).filter(Boolean),
@@ -131,6 +157,7 @@ export default function Auctions() {
 
   const categoryOptions = ['All', ...AUCTION_CATEGORIES];
   const isFiltering = words.length > 0 || selectedCategory !== 'All';
+  const sortLabel = SORT_OPTIONS.find((option) => option.value === sort)?.label || 'Sort';
 
   const clearFilters = () => {
     setSearch('');
@@ -181,18 +208,55 @@ export default function Auctions() {
               )}
             </div>
 
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              aria-label="Sort auctions"
-              className="flex-shrink-0 px-2 md:px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            {/* Sort menu */}
+            <div className="relative flex-shrink-0" ref={sortRef}>
+              <button
+                type="button"
+                onClick={() => setSortOpen((open) => !open)}
+                aria-haspopup="listbox"
+                aria-expanded={sortOpen}
+                aria-label={`Sort auctions: ${sortLabel}`}
+                className="h-full flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base text-black bg-white hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <span className="whitespace-nowrap">{sortLabel}</span>
+                <ChevronDown
+                  className={'w-4 h-4 text-gray-500 transition-transform ' + (sortOpen ? 'rotate-180' : '')}
+                />
+              </button>
+
+              {sortOpen && (
+                <div
+                  role="listbox"
+                  aria-label="Sort auctions"
+                  className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30"
+                >
+                  {SORT_OPTIONS.map((option) => {
+                    const active = option.value === sort;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        onClick={() => {
+                          setSort(option.value);
+                          setSortOpen(false);
+                        }}
+                        className={
+                          'w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left text-sm md:text-base transition ' +
+                          (active
+                            ? 'text-blue-600 font-semibold bg-blue-50'
+                            : 'text-gray-800 hover:bg-gray-50')
+                        }
+                      >
+                        <span>{option.label}</span>
+                        {active && <Check className="w-4 h-4 flex-shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Categories */}
