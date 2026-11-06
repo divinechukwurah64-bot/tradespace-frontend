@@ -1,10 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Clock } from 'lucide-react';
+import { Clock, Search, X } from 'lucide-react';
 import API from '@/lib/api';
 import { AUCTION_CATEGORIES } from '@/lib/categories';
+
+const SORT_OPTIONS = [
+  { value: 'ending', label: 'Ending soon' },
+  { value: 'newest', label: 'Newest' },
+  { value: 'price-low', label: 'Price: low' },
+  { value: 'price-high', label: 'Price: high' },
+  { value: 'bids', label: 'Most bids' },
+];
 
 // Shows the photo, or a grey box if there is none or it fails to load
 function AuctionImage({ src, alt }: { src: string | null; alt: string }) {
@@ -43,10 +51,48 @@ const matchesCategory = (auction: any, selected: string) => {
   return category === selected.toLowerCase();
 };
 
+// Every word typed must appear in the title, category or description
+const matchesSearch = (auction: any, words: string[]) => {
+  if (words.length === 0) return true;
+
+  const text = `${auction.title || ''} ${auction.category || ''} ${auction.description || ''}`.toLowerCase();
+  return words.every((word) => text.includes(word));
+};
+
+const priceOf = (auction: any) => Number(auction.currentBid || auction.startingBid || 0);
+const endsAtOf = (auction: any) => (auction.endsAt ? new Date(auction.endsAt).getTime() : 0);
+const createdAtOf = (auction: any) => (auction.createdAt ? new Date(auction.createdAt).getTime() : 0);
+
+const sortAuctions = (list: any[], sort: string) => {
+  const items = [...list];
+  const now = Date.now();
+
+  switch (sort) {
+    case 'newest':
+      return items.sort((a, b) => createdAtOf(b) - createdAtOf(a));
+    case 'price-low':
+      return items.sort((a, b) => priceOf(a) - priceOf(b));
+    case 'price-high':
+      return items.sort((a, b) => priceOf(b) - priceOf(a));
+    case 'bids':
+      return items.sort((a, b) => (b.bids?.length || 0) - (a.bids?.length || 0));
+    default:
+      // Running auctions first, soonest to end at the top. Ended ones go last.
+      return items.sort((a, b) => {
+        const aLive = endsAtOf(a) > now;
+        const bLive = endsAtOf(b) > now;
+        if (aLive !== bLive) return aLive ? -1 : 1;
+        return aLive ? endsAtOf(a) - endsAtOf(b) : endsAtOf(b) - endsAtOf(a);
+      });
+  }
+};
+
 export default function Auctions() {
-  const [auctions, setAuctions] = useState([]);
+  const [auctions, setAuctions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('ending');
 
   useEffect(() => {
     const fetchAuctions = async () => {
@@ -63,6 +109,18 @@ export default function Auctions() {
     fetchAuctions();
   }, []);
 
+  const words = useMemo(
+    () => search.toLowerCase().split(/\s+/).filter(Boolean),
+    [search]
+  );
+
+  const visibleAuctions = useMemo(() => {
+    const filtered = auctions.filter(
+      (auction: any) => matchesCategory(auction, selectedCategory) && matchesSearch(auction, words)
+    );
+    return sortAuctions(filtered, sort);
+  }, [auctions, selectedCategory, words, sort]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -71,11 +129,13 @@ export default function Auctions() {
     );
   }
 
-  const visibleAuctions = auctions.filter((auction: any) =>
-    matchesCategory(auction, selectedCategory)
-  );
-
   const categoryOptions = ['All', ...AUCTION_CATEGORIES];
+  const isFiltering = words.length > 0 || selectedCategory !== 'All';
+
+  const clearFilters = () => {
+    setSearch('');
+    setSelectedCategory('All');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -97,8 +157,46 @@ export default function Auctions() {
             </Link>
           </div>
 
+          {/* Search and sort */}
+          <div className="mt-5 flex gap-2">
+            <div className="relative flex-1 min-w-0">
+              <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search auctions"
+                maxLength={80}
+                className="w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg text-sm md:text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 [&::-webkit-search-cancel-button]:hidden"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              aria-label="Sort auctions"
+              className="flex-shrink-0 px-2 md:px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Categories */}
-          <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
             {categoryOptions.map((category) => {
               const active = category === selectedCategory;
               return (
@@ -123,13 +221,30 @@ export default function Auctions() {
 
       {/* Auctions: rows on phones, cards from tablet size up */}
       <div className="max-w-6xl mx-auto px-4 py-5 md:py-8">
+        {isFiltering && visibleAuctions.length > 0 && (
+          <p className="text-sm text-gray-600 mb-3">
+            {visibleAuctions.length} {visibleAuctions.length === 1 ? 'auction' : 'auctions'} found
+          </p>
+        )}
+
         {visibleAuctions.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">
-              {selectedCategory === 'All'
+              {words.length > 0
+                ? `No auctions match "${search.trim()}"`
+                : selectedCategory === 'All'
                 ? 'No auctions available'
                 : `No auctions in ${selectedCategory} yet`}
             </p>
+            {isFiltering && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="mt-4 text-blue-600 font-semibold hover:underline"
+              >
+                Clear search and filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
@@ -142,6 +257,7 @@ export default function Auctions() {
 
               const hours = Math.floor(timeLeft / (1000 * 60 * 60));
               const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+              const bidCount = auction.bids?.length || 0;
 
               return (
                 <Link key={auction._id} href={`/auctions/${auction._id}`} className="block">
@@ -172,7 +288,7 @@ export default function Auctions() {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-xs text-gray-600">
-                            {auction.bids?.length || 0} {(auction.bids?.length || 0) === 1 ? 'bid' : 'bids'}
+                            {bidCount} {bidCount === 1 ? 'bid' : 'bids'}
                           </p>
                         </div>
                       </div>
