@@ -12,7 +12,7 @@ function AuctionImage({ src, alt }: { src: string | null; alt: string }) {
 
   if (!src || failed) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
+      <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs md:text-sm">
         No photo
       </div>
     );
@@ -25,7 +25,7 @@ function AuctionImage({ src, alt }: { src: string | null; alt: string }) {
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
-      className="w-full h-full object-cover hover:scale-105 transition"
+      className="w-full h-full object-cover md:hover:scale-105 transition"
     />
   );
 }
@@ -121,8 +121,8 @@ export default function Auctions() {
         </div>
       </div>
 
-      {/* Auctions Grid */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Auctions: rows on phones, cards from tablet size up */}
+      <div className="max-w-6xl mx-auto px-4 py-5 md:py-8">
         {visibleAuctions.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">
@@ -132,7 +132,7 @@ export default function Auctions() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
             {visibleAuctions.map((auction: any) => {
               const image = auction.images && auction.images[0] ? auction.images[0] : null;
 
@@ -144,32 +144,36 @@ export default function Auctions() {
               const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
 
               return (
-                <Link key={auction._id} href={`/auctions/${auction._id}`}>
-                  <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer">
-                    {/* Image */}
-                    <div className="relative overflow-hidden bg-gray-200 h-48">
+                <Link key={auction._id} href={`/auctions/${auction._id}`} className="block">
+                  <div className="flex md:block bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden cursor-pointer">
+                    {/* Image: square on the left on phones, wide on top from tablet size up */}
+                    <div className="relative overflow-hidden bg-gray-200 flex-shrink-0 w-32 h-32 sm:w-40 sm:h-40 md:w-full md:h-48">
                       <AuctionImage src={image} alt={auction.title} />
                       {timeLeft > 0 && (
-                        <div className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
+                        <div className="absolute top-1.5 left-1.5 md:left-auto md:top-2 md:right-2 bg-red-600 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[11px] md:text-sm font-bold flex items-center gap-1">
+                          <Clock className="w-3 h-3 md:w-4 md:h-4" />
                           {hours}h {minutes}m
                         </div>
                       )}
                     </div>
 
                     {/* Content */}
-                    <div className="p-4">
-                      <h3 className="font-bold text-black text-lg mb-2 line-clamp-2">{auction.title}</h3>
+                    <div className="p-3 md:p-4 flex-1 min-w-0 flex flex-col justify-between">
+                      <h3 className="font-bold text-black text-base md:text-lg mb-1 md:mb-2 line-clamp-2">
+                        {auction.title}
+                      </h3>
 
-                      <div className="flex justify-between items-end">
+                      <div className="flex justify-between items-end gap-2">
                         <div>
                           <p className="text-xs text-gray-600">Current Bid</p>
-                          <p className="text-xl font-bold text-blue-600">
+                          <p className="text-lg md:text-xl font-bold text-blue-600">
                             ₦{(auction.currentBid || auction.startingBid)?.toLocaleString()}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-600">{auction.bids?.length || 0} bids</p>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-xs text-gray-600">
+                            {auction.bids?.length || 0} {(auction.bids?.length || 0) === 1 ? 'bid' : 'bids'}
+                          </p>
                         </div>
                       </div>
                     </div>
