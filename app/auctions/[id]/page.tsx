@@ -658,7 +658,7 @@ export default function AuctionDetail() {
               <Photo
                 src={mainImage}
                 alt={auction.title}
-                className="w-full h-64 md:h-80 object-cover"
+                className="w-full h-64 md:h-[28rem] object-cover md:object-contain bg-gray-100"
                 eager
               />
 
