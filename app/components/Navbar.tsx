@@ -3,10 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, LogOut, User, MessageCircle } from 'lucide-react';
+import { Menu, X, LogOut, User, MessageCircle, HelpCircle } from 'lucide-react';
 import API from '@/lib/api';
 import DialogHost from './DialogHost';
 import NotificationBell from './NotificationBell';
+import Tutorial from './Tutorial';
+
+// Set by the sign-up page with the new account's id. The tutorial starts once for that account.
+const TUTORIAL_PENDING_KEY = 'ts_tutorial_pending';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -15,6 +19,7 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [liveCount, setLiveCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -25,6 +30,23 @@ export default function Navbar() {
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  // Starts the tutorial once for an account that was just created
+  useEffect(() => {
+    if (!user || !user._id) return;
+
+    let pending: string | null = null;
+    try {
+      pending = localStorage.getItem(TUTORIAL_PENDING_KEY);
+    } catch (err) {
+      return;
+    }
+
+    if (pending !== String(user._id)) return;
+
+    const timer = setTimeout(() => setTutorialOpen(true), 1200);
+    return () => clearTimeout(timer);
+  }, [user]);
 
   // How many sellers are live right now. Pauses while the tab is hidden.
   useEffect(() => {
@@ -98,6 +120,20 @@ export default function Navbar() {
 
   const closeMenu = () => setIsOpen(false);
 
+  const openTutorial = () => {
+    setIsOpen(false);
+    setTutorialOpen(true);
+  };
+
+  const closeTutorial = () => {
+    setTutorialOpen(false);
+    try {
+      localStorage.removeItem(TUTORIAL_PENDING_KEY);
+    } catch (err) {
+      // ignore
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -114,6 +150,7 @@ export default function Navbar() {
   return (
     <>
       <DialogHost />
+      <Tutorial open={tutorialOpen} onClose={closeTutorial} />
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
@@ -129,7 +166,11 @@ export default function Navbar() {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center gap-8">
-              <Link href="/auctions" className="text-gray-700 hover:text-blue-600 font-medium text-sm md:text-base">
+              <Link
+                href="/auctions"
+                data-tutorial="auctions-link"
+                className="text-gray-700 hover:text-blue-600 font-medium text-sm md:text-base"
+              >
                 Auctions
               </Link>
               <Link href="/clear-space" className="text-gray-700 hover:text-blue-600 font-medium text-sm md:text-base">
@@ -142,6 +183,7 @@ export default function Navbar() {
               <Link
                 href="/live"
                 onClick={closeMenu}
+                data-tutorial="live-link"
                 className={
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ' +
                   (isLive
@@ -161,6 +203,7 @@ export default function Navbar() {
                 <Link
                   href="/messages"
                   onClick={closeMenu}
+                  data-tutorial="messages-link"
                   className="relative p-2 text-gray-700 hover:text-blue-600"
                   title="Messages"
                   aria-label={unreadMessages > 0 ? `Messages, ${unreadMessages} unread` : 'Messages'}
@@ -175,6 +218,17 @@ export default function Navbar() {
               )}
 
               {user && <NotificationBell />}
+
+              {/* Help button: desktop. On phones it is in the menu. */}
+              <button
+                type="button"
+                onClick={openTutorial}
+                className="hidden md:inline-flex p-2 text-gray-700 hover:text-blue-600"
+                title="How TradeSpace works"
+                aria-label="How TradeSpace works"
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
 
               <div className="hidden md:flex items-center gap-4">
                 {user ? (
@@ -231,6 +285,14 @@ export default function Navbar() {
               <Link href="/clear-space" onClick={closeMenu} className="block text-gray-700 hover:text-blue-600 font-medium text-sm">
                 Clear Space
               </Link>
+              <button
+                type="button"
+                onClick={openTutorial}
+                className="flex items-center gap-2 w-full text-left text-gray-700 hover:text-blue-600 font-medium text-sm"
+              >
+                <HelpCircle className="w-4 h-4" />
+                How TradeSpace works
+              </button>
 
               {user ? (
                 <>

@@ -57,6 +57,8 @@ export default function Register() {
       });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      // The Navbar starts the tutorial once for this new account
+      localStorage.setItem('ts_tutorial_pending', String(response.data.user._id));
       window.location.href = '/auctions';
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
