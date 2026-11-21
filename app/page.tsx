@@ -1,13 +1,14 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Gavel,
-  ShoppingCart,
   Lock,
   ArrowRight,
   CheckCircle,
   ChevronDown,
+  Clock,
   Smartphone,
   Shirt,
   Home as HomeIcon,
@@ -15,6 +16,7 @@ import {
   BookOpen,
   Package,
 } from 'lucide-react';
+import API from '@/lib/api';
 import { AUCTION_CATEGORIES } from '@/lib/categories';
 
 const FAQS = [
@@ -50,7 +52,78 @@ const CATEGORY_ICONS: Record<string, any> = {
   Other: Package,
 };
 
+const FEATURED_COUNT = 4;
+
+const formatTimeLeft = (ms: number) => {
+  if (ms <= 0) return 'Ended';
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.floor((ms % 3600000) / 60000);
+  return `${hours}h ${minutes}m left`;
+};
+
+// Shows the photo, or a grey box if there is none or it fails to load
+function FeaturedImage({ src, alt }: { src: string | null; alt: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
+        No photo
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+      className="w-full h-full object-cover md:object-contain"
+    />
+  );
+}
+
 export default function Home() {
+  const [featured, setFeatured] = useState<any[]>([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+  const [now, setNow] = useState(() => Date.now());
+
+  // The auctions that end soonest. Ended ones are left out.
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const response = await API.get('/auctions');
+        if (cancelled) return;
+
+        const running = (Array.isArray(response.data) ? response.data : [])
+          .filter((a: any) => a.endsAt && new Date(a.endsAt).getTime() > Date.now())
+          .sort((a: any, b: any) => new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime())
+          .slice(0, FEATURED_COUNT);
+
+        setFeatured(running);
+      } catch (err) {
+        if (!cancelled) setFeatured([]);
+      } finally {
+        if (!cancelled) setFeaturedLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Keeps the "time left" text moving without reloading
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Banner */}
@@ -168,36 +241,80 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Featured Section */}
+      {/* Featured Section: real auctions ending soon */}
       <div className="bg-gray-50 py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-black">Live Auctions</h3>
-              <p className="text-gray-600 text-sm">Trending items ending soon</p>
+              <p className="text-gray-600 text-sm">Ending soon</p>
             </div>
             <Link href="/auctions" className="hidden md:flex items-center gap-1 text-blue-600 font-bold hover:text-blue-700 text-sm">
               See all <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition bg-white">
-                <div className="bg-gray-100 h-40 sm:h-48 flex items-center justify-center">
-                  <ShoppingCart className="w-12 h-12 text-gray-400" />
-                </div>
-                <div className="p-4">
-                  <p className="text-sm font-bold text-gray-900">Premium Item</p>
-                  <p className="text-xs text-gray-500 mt-1">Ends in 2 hours</p>
-                  <div className="mt-3 flex justify-between items-center">
-                    <span className="text-lg font-bold text-black">₦5,450</span>
-                    <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">12 bids</span>
+          {featuredLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: FEATURED_COUNT }).map((_, i) => (
+                <div key={i} className="border border-gray-200 rounded-lg overflow-hidden bg-white animate-pulse">
+                  <div className="bg-gray-200 h-40 sm:h-48" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/3" />
+                    <div className="h-5 bg-gray-200 rounded w-1/2" />
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : featured.length === 0 ? (
+            <div className="rounded-2xl border border-gray-200 bg-white px-6 py-12 text-center">
+              <p className="text-lg font-bold text-black">No live auctions right now</p>
+              <p className="text-gray-600 text-sm mt-2">Be the first to list something and start the bidding.</p>
+              <Link
+                href="/create-auction"
+                className="inline-block mt-5 bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700"
+              >
+                Create an auction
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {featured.map((auction: any) => {
+                const image = auction.images && auction.images[0] ? auction.images[0] : null;
+                const left = new Date(auction.endsAt).getTime() - now;
+                const bidCount = auction.bids?.length || 0;
+                const price = auction.currentBid || auction.startingBid;
+
+                return (
+                  <Link
+                    key={auction._id}
+                    href={`/auctions/${auction._id}`}
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition bg-white"
+                  >
+                    <div className="relative bg-gray-100 h-40 sm:h-48 overflow-hidden">
+                      <FeaturedImage src={image} alt={auction.title} />
+                      <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatTimeLeft(left)}
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-sm font-bold text-gray-900 line-clamp-2">{auction.title}</p>
+                      <div className="mt-3 flex justify-between items-center">
+                        <span className="text-lg font-bold text-blue-600">
+                          ₦{Number(price).toLocaleString()}
+                        </span>
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
+                          {bidCount} {bidCount === 1 ? 'bid' : 'bids'}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
 
           <div className="text-center mt-8 md:hidden">
             <Link href="/auctions" className="inline-block text-blue-600 font-bold hover:text-blue-700">
