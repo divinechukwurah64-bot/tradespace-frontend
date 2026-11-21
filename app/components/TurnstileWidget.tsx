@@ -8,10 +8,11 @@ declare global {
   }
 }
 
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE || '';
+// The Site Key is public by design. The private Secret Key lives only in Railway.
+const SITE_KEY = '0x4AAAAAAGLEi8gIOFxhhqB0';
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
-export const turnstileEnabled = !!SITE_KEY;
+export const turnstileEnabled = !!SITE_KEY && !SITE_KEY.startsWith('PASTE');
 
 // Shows the Cloudflare check. onToken gets the token when it passes, and '' when it expires or fails.
 // Change resetKey to make the check start over (for example after a failed sign-up).
@@ -26,7 +27,7 @@ export default function TurnstileWidget({
   const widgetId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!SITE_KEY) return;
+    if (!turnstileEnabled) return;
 
     let cancelled = false;
 
@@ -85,7 +86,7 @@ export default function TurnstileWidget({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey]);
 
-  if (!SITE_KEY) return null;
+  if (!turnstileEnabled) return null;
 
   return <div ref={containerRef} className="flex justify-center" />;
 }
