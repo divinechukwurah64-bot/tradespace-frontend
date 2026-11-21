@@ -111,6 +111,19 @@ export default function Auctions() {
     fetchAuctions();
   }, []);
 
+  // Opens with a category already chosen when the link is /auctions?category=Electronics
+  useEffect(() => {
+    try {
+      const wanted = new URLSearchParams(window.location.search).get('category');
+      if (!wanted) return;
+
+      const match = AUCTION_CATEGORIES.find((c) => c.toLowerCase() === wanted.trim().toLowerCase());
+      if (match) setSelectedCategory(match);
+    } catch (err) {
+      // ignore a bad link
+    }
+  }, []);
+
   // Closes the sort menu when you tap outside it or press Escape
   useEffect(() => {
     if (!sortOpen) return;
@@ -173,11 +186,12 @@ export default function Auctions() {
             <div className="min-w-0">
               <h1 className="text-2xl md:text-3xl font-bold text-black">Live Auctions</h1>
               <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">
-                Browse and bid on thousands of items
+                Browse and bid on items from sellers across Nigeria
               </p>
             </div>
             <Link
               href="/create-auction"
+              data-tutorial="create-auction-btn"
               className="flex-shrink-0 whitespace-nowrap bg-blue-600 text-white text-sm md:text-base font-semibold px-4 py-2 md:px-6 rounded-lg hover:bg-blue-700"
             >
               Create Auction

@@ -102,6 +102,14 @@ const windowNote = (sale: any) => {
   return `Shown here for ${days} more ${days === 1 ? 'day' : 'days'}`;
 };
 
+const formatLeft = (ms: number) => {
+  if (ms <= 0) return '0h 0m';
+  const days = Math.floor(ms / DAY_MS);
+  const hours = Math.floor((ms % DAY_MS) / 3600000);
+  const minutes = Math.floor((ms % 3600000) / 60000);
+  return days > 0 ? `${days}d ${hours}h` : `${hours}h ${minutes}m`;
+};
+
 function SaleCard({ sale, role }: { sale: any; role: 'buyer' | 'seller' }) {
   return (
     <Link
@@ -128,9 +136,38 @@ function SaleCard({ sale, role }: { sale: any; role: 'buyer' | 'seller' }) {
   );
 }
 
+// An auction the person won and has not paid for yet
+function ToPayCard({ item }: { item: any }) {
+  const left = new Date(item.paymentDueAt).getTime() - Date.now();
+  const urgent = left < DAY_MS;
+
+  return (
+    <Link
+      href={`/auctions/${item.auctionId}`}
+      className="bg-yellow-50 border-2 border-yellow-300 rounded-lg hover:shadow-lg transition flex gap-4 p-3"
+    >
+      <div className="w-20 h-20 flex-shrink-0 bg-gray-200 rounded overflow-hidden">
+        <Thumb src={item.image} alt={item.title} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-black truncate">{item.title}</p>
+        <p className="text-sm text-gray-700">
+          ₦{Number(item.amount).toLocaleString()}
+          {item.sellerName ? ` from ${item.sellerName}` : ''}
+        </p>
+        <p className={`text-sm font-semibold mt-1 ${urgent ? 'text-red-600' : 'text-yellow-800'}`}>
+          Pay within {formatLeft(left)}
+        </p>
+        <p className="text-xs text-gray-600 mt-1">Tap to open the auction and pay</p>
+      </div>
+    </Link>
+  );
+}
+
 export default function MyProfile() {
   const [me, setMe] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [toPay, setToPay] = useState<any[]>([]);
   const [bought, setBought] = useState<any[]>([]);
   const [sold, setSold] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,6 +200,13 @@ export default function MyProfile() {
         setProfile(profileRes.data);
       } catch (e) {
         console.error('Failed to load profile stats');
+      }
+
+      try {
+        const toPayRes = await API.get('/payments/to-pay');
+        setToPay(toPayRes.data);
+      } catch (e) {
+        console.error('Failed to load unpaid wins');
       }
 
       try {
@@ -423,6 +467,21 @@ export default function MyProfile() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
             {error}
+          </div>
+        )}
+
+        {toPay.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-black mb-1">Waiting for your payment</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              You won {toPay.length === 1 ? 'this auction' : 'these auctions'}. Pay before the deadline, or the item
+              goes to the next highest bidder and you get a strike.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {toPay.map((item: any) => (
+                <ToPayCard key={item.auctionId} item={item} />
+              ))}
+            </div>
           </div>
         )}
 

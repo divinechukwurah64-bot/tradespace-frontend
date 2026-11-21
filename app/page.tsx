@@ -1,7 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { Gavel, ShoppingCart, Lock, ArrowRight, CheckCircle, ChevronDown } from 'lucide-react';
+import {
+  Gavel,
+  ShoppingCart,
+  Lock,
+  ArrowRight,
+  CheckCircle,
+  ChevronDown,
+  Smartphone,
+  Shirt,
+  Home as HomeIcon,
+  Dumbbell,
+  BookOpen,
+  Package,
+} from 'lucide-react';
+import { AUCTION_CATEGORIES } from '@/lib/categories';
 
 const FAQS = [
   {
@@ -26,24 +40,34 @@ const FAQS = [
   },
 ];
 
+// One icon per category. Anything not listed here falls back to a package icon.
+const CATEGORY_ICONS: Record<string, any> = {
+  Electronics: Smartphone,
+  Fashion: Shirt,
+  Home: HomeIcon,
+  Sports: Dumbbell,
+  Books: BookOpen,
+  Other: Package,
+};
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Banner */}
       <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 md:py-20 relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-20"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=400&fit=crop')`
           }}
         ></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-3">TradeSpace</h1>
             <p className="text-lg md:text-xl text-gray-300 mb-4">Bid. Buy. Sell. Confidently.</p>
             <p className="text-base md:text-lg text-gray-400 mb-8">
-              Your money is safe. We hold payments until you're satisfied with your order.
+              Your payment is held safely until you confirm your order arrived.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/auctions" className="inline-block bg-blue-600 text-white px-6 md:px-8 py-2 md:py-3 rounded-full font-bold hover:bg-blue-700 text-center">
@@ -57,12 +81,42 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Shop by category */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-10 md:py-12">
+          <div className="flex justify-between items-end mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-black">Shop by category</h2>
+            <Link href="/auctions" className="hidden sm:flex items-center gap-1 text-blue-600 font-bold hover:text-blue-700 text-sm">
+              All auctions <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+            {AUCTION_CATEGORIES.map((category) => {
+              const Icon = CATEGORY_ICONS[category] || Package;
+              return (
+                <Link
+                  key={category}
+                  href={`/auctions?category=${encodeURIComponent(category)}`}
+                  className="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-6 hover:border-blue-500 hover:shadow-md transition"
+                >
+                  <span className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition">
+                    <Icon className="w-6 h-6" />
+                  </span>
+                  <span className="font-bold text-black text-sm md:text-base">{category}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* About Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
           <h2 className="text-2xl md:text-3xl font-bold text-black mb-8">Why TradeSpace?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
+
             <div className="flex gap-4">
               <CheckCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
               <div>
@@ -82,8 +136,8 @@ export default function Home() {
             <div className="flex gap-4">
               <CheckCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-bold text-black mb-2">Verified Sellers</h3>
-                <p className="text-gray-600 text-sm">Buy from trusted sellers. Every review is verified and backed by real transactions.</p>
+                <h3 className="font-bold text-black mb-2">Seller Ratings</h3>
+                <p className="text-gray-600 text-sm">Buyers rate the seller after a sale, and the ratings show on every seller profile.</p>
               </div>
             </div>
 
@@ -107,7 +161,7 @@ export default function Home() {
               <CheckCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-bold text-black mb-2">Build Your Reputation</h3>
-                <p className="text-gray-600 text-sm">Earn 5-star ratings. Access tools to scale your buying or selling.</p>
+                <p className="text-gray-600 text-sm">Earn ratings from buyers and build a profile people trust.</p>
               </div>
             </div>
           </div>
@@ -157,7 +211,7 @@ export default function Home() {
       <div className="bg-blue-600 text-white py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h3 className="text-2xl md:text-4xl font-bold mb-4">Ready to Start Trading?</h3>
-          <p className="text-base md:text-lg text-blue-100 mb-8">Join Nigeria's fastest growing marketplace</p>
+          <p className="text-base md:text-lg text-blue-100 mb-8">Join TradeSpace and place your first bid today</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register" className="bg-white text-blue-600 px-6 md:px-8 py-2 md:py-3 rounded-full font-bold hover:bg-gray-100 text-center">
               Create Account
