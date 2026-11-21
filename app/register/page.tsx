@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { authAPI } from '@/lib/api';
-import { Mail, Lock, User, Phone } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import TurnstileWidget, { turnstileEnabled } from '../components/TurnstileWidget';
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -15,11 +15,13 @@ export default function Register() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileReset, setTurnstileReset] = useState(0);
+  const [trap, setTrap] = useState('');
+  // When the form was opened. The server rejects forms that were filled in impossibly fast.
+  const openedAt = useRef(Date.now());
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
-    phone: '',
   });
 
   const handleChange = (e) => {
@@ -57,10 +59,13 @@ export default function Register() {
 
     try {
       const response = await authAPI.register({
-        ...formData,
+        fullName: formData.fullName,
         email: formData.email.trim(),
+        password: formData.password,
         acceptedTerms: true,
         turnstileToken,
+        website: trap,
+        formOpenedAt: openedAt.current,
       });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -89,6 +94,23 @@ export default function Register() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* Hidden from people. Bots that fill in every field give themselves away. */}
+          <div
+            aria-hidden="true"
+            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}
+          >
+            <label htmlFor="website">Website</label>
+            <input
+              id="website"
+              type="text"
+              name="website"
+              value={trap}
+              onChange={(e) => setTrap(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
@@ -121,21 +143,6 @@ export default function Register() {
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">We will send a 6-digit code to this address.</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-black bg-white"
-                placeholder="+234 (optional)"
-              />
-            </div>
           </div>
 
           <div>
