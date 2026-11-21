@@ -9,7 +9,7 @@ import DialogHost from './DialogHost';
 import NotificationBell from './NotificationBell';
 import Tutorial from './Tutorial';
 
-// Set by the sign-up page with the new account's id. The tutorial starts once for that account.
+// Set by the verify page with the new account's id. The tutorial starts once for that account.
 const TUTORIAL_PENDING_KEY = 'ts_tutorial_pending';
 
 export default function Navbar() {
@@ -31,7 +31,7 @@ export default function Navbar() {
     setIsOpen(false);
   }, [pathname]);
 
-  // Starts the tutorial once for an account that was just created
+  // Starts the tutorial once for an account that was just verified
   useEffect(() => {
     if (!user || !user._id) return;
 
@@ -109,10 +109,31 @@ export default function Navbar() {
     };
   }, [user]);
 
+  // Asks the server whether the email is verified, so the banner is right even if the
+  // saved login is old or the account was verified on another device
+  const syncVerification = async (current: any) => {
+    try {
+      const res = await API.get('/auth/me');
+      const verified = !!res.data && res.data.emailVerified !== false;
+
+      if ((current.emailVerified !== false) !== verified) {
+        const updated = { ...current, emailVerified: verified };
+        localStorage.setItem('user', JSON.stringify(updated));
+        setUser(updated);
+      }
+    } catch (err) {
+      // leave things as they are
+    }
+  };
+
   const checkUser = () => {
     try {
       const userData = localStorage.getItem('user');
-      setUser(userData ? JSON.parse(userData) : null);
+      const parsed = userData ? JSON.parse(userData) : null;
+      setUser(parsed);
+      if (parsed && localStorage.getItem('token')) {
+        syncVerification(parsed);
+      }
     } catch (err) {
       setUser(null);
     }
@@ -146,6 +167,7 @@ export default function Navbar() {
 
   const isLive = liveCount > 0;
   const unreadLabel = unreadMessages > 99 ? '99+' : String(unreadMessages);
+  const showVerifyBanner = !!user && user.emailVerified === false && pathname !== '/verify-email';
 
   return (
     <>
@@ -323,6 +345,17 @@ export default function Navbar() {
           )}
         </div>
       </nav>
+
+      {showVerifyBanner && (
+        <div className="bg-yellow-50 border-b border-yellow-200 text-yellow-900 text-sm">
+          <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
+            <span>Verify your email to bid, sell and message.</span>
+            <Link href="/verify-email" className="font-bold text-blue-600 hover:underline whitespace-nowrap">
+              Verify now
+            </Link>
+          </div>
+        </div>
+      )}
     </>
   );
 }
